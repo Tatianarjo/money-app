@@ -242,7 +242,10 @@ export default function App() {
             <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1rem, 3.5vw, 1.1rem)', color: 'var(--accent)', letterSpacing: '-0.02em' }}>
               Money HQ
             </div>
-            <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.62rem', color: '#EC4899', fontWeight: 600, letterSpacing: '0.04em', marginTop: 2 }}>
+              Your Budget Assistant
+            </div>
+            <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 3 }}>
               {level.icon} {level.name}
             </div>
           </div>
@@ -371,6 +374,26 @@ export default function App() {
           {tab === 'soft'      && <SoftLifeTab  softLife={softLife} setSoftLife={setSoftLife} currentMonth={currentMonth} />}
         </main>
       </ErrorBoundary>
+
+      <footer
+        className="app-footer"
+        style={{
+          textAlign: 'center',
+          padding: '1.25rem max(1rem, env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left))',
+          borderTop: '1px solid var(--border)',
+          fontSize: '0.72rem',
+          fontFamily: 'var(--sans)',
+        }}
+      >
+        <a
+          href="https://eyecodeglitter.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#EC4899', textDecoration: 'none', fontWeight: 600 }}
+        >
+          Powered By eyeCODEGlitter
+        </a>
+      </footer>
 
       <div className="print-mount" aria-hidden>
         <PrintableReport
