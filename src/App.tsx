@@ -3,7 +3,7 @@ import { usePersistedState } from '@/hooks/usePersistedState'
 import { calcScore, getLevel } from '@/utils/gamification'
 import { fmt } from '@/utils/format'
 import {
-  seedIncome,
+  INIT_INCOME,
   INIT_EXPENSES,
   INIT_DEBTS,
   INIT_SOFT,
@@ -63,11 +63,11 @@ const TABS: TabDef[] = [
 
 export default function App() {
   const [dark,           setDark]           = usePersistedState<boolean>('dark', true)
-  const [income,         setIncome]         = usePersistedState<IncomeEntry[]>('income', seedIncome())
+  const [income,         setIncome]         = usePersistedState<IncomeEntry[]>('income', INIT_INCOME)
   const [expenses,       setExpenses]       = usePersistedState<Expense[]>('expenses', INIT_EXPENSES)
   const [debts,          setDebts]          = usePersistedState<Debt[]>('debts', INIT_DEBTS)
   const [softLife,       setSoftLife]       = usePersistedState<SoftEntry[]>('soft', INIT_SOFT)
-  const [savingsGoal,    setSavingsGoal]    = usePersistedState<number>('savingsGoal', 1_000)
+  const [savingsGoal,    setSavingsGoal]    = usePersistedState<number>('savingsGoal', 0)
   const [savingsActual, setSavingsActual] = usePersistedState<number>('savingsActual', 0)
   const [currentMonth,   setCurrentMonth]   = usePersistedState<string>('currentMonth', monthKeyNow())
   const [savingsByMonth, setSavingsByMonth] = usePersistedState<Record<string, number>>('savingsByMonth', {})
@@ -131,12 +131,12 @@ export default function App() {
   )
 
   const handleReset = () => {
-    setIncome(seedIncome())
+    setIncome(INIT_INCOME)
     setExpenses(INIT_EXPENSES)
     setDebts(INIT_DEBTS)
     setSoftLife(INIT_SOFT)
     setSavingsActual(0)
-    setSavingsGoal(1_000)
+    setSavingsGoal(0)
     setCurrentMonth(monthKeyNow())
     setSavingsByMonth({})
     setTotalOrigDebt(DEFAULT_TOTAL_ORIG_DEBT)
@@ -494,7 +494,7 @@ export default function App() {
         </div>
 
         <p style={{ color: '#FB7185', marginBottom: '1rem', lineHeight: 1.6, fontSize: '0.82rem' }}>
-          Reset wipes all entries and restores fresh seed data for the current calendar month. This cannot be undone.
+          Reset clears all entries, savings, and debt baseline back to empty defaults for the current calendar month. This cannot be undone.
         </p>
 
         <div className="save-cancel-row" style={{ display: 'flex', gap: '0.625rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
