@@ -1,0 +1,5 @@
+export { DashboardTab } from './DashboardTab'
+export { IncomeTab    } from './IncomeTab'
+export { BillsTab     } from './BillsTab'
+export { DebtTab      } from './DebtTab'
+export { SoftLifeTab  } from './SoftLifeTab'
