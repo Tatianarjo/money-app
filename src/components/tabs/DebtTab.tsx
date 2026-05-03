@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { uid, DEBT_PRIORITIES, DEBT_STATUSES, TOTAL_ORIG_DEBT } from '@/constants'
+import { uid, DEBT_PRIORITIES, DEBT_STATUSES } from '@/constants'
 import { fmt } from '@/utils/format'
 import { Card, SectionHead, AddBtn, EditBtn, DelBtn, Modal, Field, Bar, Pill, SaveCancel } from '@/components/ui'
 import type { Debt, DebtForm, DebtPriority, DebtStatus } from '@/types'
@@ -7,6 +7,7 @@ import type { Debt, DebtForm, DebtPriority, DebtStatus } from '@/types'
 interface Props {
   debts: Debt[]
   setDebts: React.Dispatch<React.SetStateAction<Debt[]>>
+  totalOrigDebt: number
 }
 
 const PRIORITY_COLOR: Record<DebtPriority, string> = {
@@ -17,7 +18,7 @@ const BLANK: DebtForm = {
   cardName: '', balance: '', creditLimit: '', minPayment: '', priority: 'High', status: 'Active',
 }
 
-export function DebtTab({ debts, setDebts }: Props) {
+export function DebtTab({ debts, setDebts, totalOrigDebt }: Props) {
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
   const [form,    setForm]    = useState<DebtForm>(BLANK)
@@ -31,8 +32,9 @@ export function DebtTab({ debts, setDebts }: Props) {
   const totalMin   = active.reduce((s, d) => s + d.minPayment, 0)
   const totalLimit = active.reduce((s, d) => s + d.creditLimit, 0)
   const utilization = totalLimit > 0 ? ((totalDebt / totalLimit) * 100).toFixed(1) : null
-  const debtPaid   = Math.max(0, TOTAL_ORIG_DEBT - totalDebt)
-  const debtPct    = Math.min(100, (debtPaid / TOTAL_ORIG_DEBT) * 100)
+  const baseline   = totalOrigDebt > 0 ? totalOrigDebt : 1
+  const debtPaid   = Math.max(0, totalOrigDebt - totalDebt)
+  const debtPct    = Math.min(100, (debtPaid / baseline) * 100)
   const snowball   = [...active].sort((a, b) => a.balance - b.balance)
 
   const utilizColor = utilization
@@ -61,7 +63,7 @@ export function DebtTab({ debts, setDebts }: Props) {
     if (editing) {
       setDebts((prev) => prev.map((d) => (d.id === editing ? { ...d, ...entry } : d)))
     } else {
-      setDebts((prev) => [...prev, { id: uid(), ...entry }])
+      setDebts((prev) => [...prev, { id: uid(), ...entry, balanceByMonth: {} }])
     }
     setModal(false)
   }
@@ -100,7 +102,7 @@ export function DebtTab({ debts, setDebts }: Props) {
       {/* Progress bar */}
       <Card style={{ marginBottom: '1.25rem' }}>
         <div style={{ fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>🎯 Payoff Progress</div>
-        <Bar value={debtPaid} max={TOTAL_ORIG_DEBT} color="#FB7185" h={8} />
+        <Bar value={debtPaid} max={totalOrigDebt} color="#FB7185" h={8} />
         <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.4rem' }}>
           {fmt(debtPaid)} paid down · {fmt(totalDebt)} remaining
         </div>

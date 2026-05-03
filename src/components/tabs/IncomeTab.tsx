@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { uid, INCOME_TYPES } from '@/constants'
 import { fmt } from '@/utils/format'
 import { Card, SectionHead, AddBtn, EditBtn, DelBtn, Modal, Field, SaveCancel } from '@/components/ui'
 import type { IncomeEntry, IncomeForm, IncomeType } from '@/types'
+import { formatMonthLabel } from '@/utils/month'
 
 interface Props {
   income: IncomeEntry[]
   setIncome: React.Dispatch<React.SetStateAction<IncomeEntry[]>>
+  currentMonth: string
 }
 
 const TYPE_COLORS: Record<IncomeType, string> = {
@@ -23,7 +25,7 @@ const BLANK: IncomeForm = {
   type: 'Salary',
 }
 
-export function IncomeTab({ income, setIncome }: Props) {
+export function IncomeTab({ income, setIncome, currentMonth }: Props) {
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
   const [form,    setForm]    = useState<IncomeForm>(BLANK)
@@ -33,7 +35,7 @@ export function IncomeTab({ income, setIncome }: Props) {
 
   const openNew = () => {
     setEditing(null)
-    setForm(BLANK)
+    setForm({ ...BLANK, date: `${currentMonth}-01` })
     setModal(true)
   }
 
@@ -61,26 +63,32 @@ export function IncomeTab({ income, setIncome }: Props) {
 
   const del = (id: string) => setIncome((prev) => prev.filter((i) => i.id !== id))
 
-  const total = income.reduce((s, i) => s + i.amount, 0)
+  const visible = useMemo(() => income.filter((i) => i.date.startsWith(currentMonth)), [income, currentMonth])
+  const total = visible.reduce((s, i) => s + i.amount, 0)
 
   return (
     <div className="fade-up">
       <SectionHead
         title="💸 Income Drops"
-        sub={<>Total: <strong style={{ color: '#10B981' }}>{fmt(total)}</strong></>}
+        sub={
+          <>
+            <span style={{ display: 'block', marginBottom: 4 }}>{formatMonthLabel(currentMonth)}</span>
+            Total: <strong style={{ color: '#10B981' }}>{fmt(total)}</strong>
+          </>
+        }
         action={<AddBtn label="+ Drop" onClick={openNew} />}
       />
 
       <div style={{ display: 'grid', gap: '0.625rem' }}>
-        {income.length === 0 && (
+        {visible.length === 0 && (
           <Card>
             <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem', fontSize: '0.9rem' }}>
-              No income entries yet. Add your first drop.
+              No income for this month yet. Add a drop with a date in {formatMonthLabel(currentMonth)}.
             </div>
           </Card>
         )}
 
-        {income.map((item) => (
+        {visible.map((item) => (
           <Card key={item.id} className="money-list-card" style={{ display: 'flex', gap: '1rem', padding: '0.875rem 1.125rem' }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: TYPE_COLORS[item.type], flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>

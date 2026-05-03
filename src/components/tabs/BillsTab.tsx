@@ -3,10 +3,12 @@ import { uid, EXPENSE_CATS, EXPENSE_TYPES, EXPENSE_STATUSES } from '@/constants'
 import { fmt } from '@/utils/format'
 import { Card, SectionHead, AddBtn, EditBtn, DelBtn, Modal, Field, SaveCancel } from '@/components/ui'
 import type { Expense, ExpenseForm, ExpenseType, ExpenseStatus } from '@/types'
+import { formatMonthLabel } from '@/utils/month'
 
 interface Props {
   expenses: Expense[]
   setExpenses: React.Dispatch<React.SetStateAction<Expense[]>>
+  currentMonth: string
 }
 
 interface FilterDef {
@@ -34,7 +36,7 @@ const BLANK: ExpenseForm = {
   name: '', amount: '', category: 'Rent', type: 'Fixed', billingDate: '', status: 'Active',
 }
 
-export function BillsTab({ expenses, setExpenses }: Props) {
+export function BillsTab({ expenses, setExpenses, currentMonth }: Props) {
   const [filter,  setFilter]  = useState('All')
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
@@ -57,14 +59,18 @@ export function BillsTab({ expenses, setExpenses }: Props) {
 
   const save = () => {
     if (!form.name.trim() || !form.amount) return
-    const entry: Omit<Expense, 'id'> = {
-      name: form.name, amount: Number(form.amount), category: form.category,
-      type: form.type, billingDate: form.billingDate, status: form.status,
+    const base = {
+      name: form.name,
+      amount: Number(form.amount),
+      category: form.category,
+      type: form.type,
+      billingDate: form.billingDate,
+      status: form.status,
     }
     if (editing) {
-      setExpenses((prev) => prev.map((e) => (e.id === editing ? { ...e, ...entry } : e)))
+      setExpenses((prev) => prev.map((e) => (e.id === editing ? { ...e, ...base } : e)))
     } else {
-      setExpenses((prev) => [...prev, { id: uid(), ...entry }])
+      setExpenses((prev) => [...prev, { id: uid(), ...base, paidByMonth: {} }])
     }
     setModal(false)
   }
@@ -80,12 +86,25 @@ export function BillsTab({ expenses, setExpenses }: Props) {
       )
     )
 
+  const toggleMonthPaid = (id: string) =>
+    setExpenses((prev) =>
+      prev.map((e) => {
+        if (e.id !== id) return e
+        const pm = { ...(e.paidByMonth ?? {}) }
+        const cur = pm[currentMonth]
+        const nextPaid = !cur?.paid
+        pm[currentMonth] = nextPaid ? { paid: true, actualAmount: e.amount } : { paid: false }
+        return { ...e, paidByMonth: pm }
+      }),
+    )
+
   return (
     <div className="fade-up">
       <SectionHead
         title="📋 The Bills Set"
         sub={
           <>
+            <span style={{ display: 'block', marginBottom: 4 }}>{formatMonthLabel(currentMonth)} · Mark bills paid for history</span>
             Active: <strong style={{ color: '#F59E0B' }}>{fmt(activeTotal)}</strong>
             {' · '}
             Subs: <strong style={{ color: subsTotal > 150 ? '#EF4444' : '#06B6D4' }}>{fmt(subsTotal)}</strong>
@@ -135,12 +154,39 @@ export function BillsTab({ expenses, setExpenses }: Props) {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>{e.name}</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{e.category} · Due: {e.billingDate || '—'}</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
+              {e.category} · Due: {e.billingDate || '—'}
+              {e.status !== 'Cancelled' && (
+                <span style={{ marginLeft: 8, color: e.paidByMonth?.[currentMonth]?.paid ? '#10B981' : 'var(--muted)', fontWeight: 700 }}>
+                  {e.paidByMonth?.[currentMonth]?.paid ? ' · Paid this month' : ' · Unpaid'}
+                </span>
+              )}
+            </div>
             </div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', color: 'var(--text)', flexShrink: 0 }}>
               {fmt(e.amount)}
             </div>
             <div className="money-list-actions">
+              {e.status !== 'Cancelled' && (
+                <button
+                  type="button"
+                  onClick={() => toggleMonthPaid(e.id)}
+                  style={{
+                    background: e.paidByMonth?.[currentMonth]?.paid ? '#10B98122' : 'var(--card2)',
+                    border: `1px solid ${e.paidByMonth?.[currentMonth]?.paid ? '#10B98155' : 'var(--border)'}`,
+                    borderRadius: '0.5rem',
+                    padding: '0.3rem 0.55rem',
+                    color: e.paidByMonth?.[currentMonth]?.paid ? '#10B981' : 'var(--muted)',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontFamily: 'var(--sans)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {e.paidByMonth?.[currentMonth]?.paid ? 'Paid ✓' : 'Mark paid'}
+                </button>
+              )}
               {e.type === 'Subscription' && (
                 <button
                   onClick={() => toggleStatus(e.id)}

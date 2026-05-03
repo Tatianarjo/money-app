@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { uid, SOFT_CATS } from '@/constants'
 import { fmt } from '@/utils/format'
 import { Card, SectionHead, AddBtn, EditBtn, DelBtn, Modal, Field, Bar, SaveCancel } from '@/components/ui'
 import type { SoftEntry, SoftForm, SoftCat } from '@/types'
+import { formatMonthLabel } from '@/utils/month'
 
 interface Props {
   softLife: SoftEntry[]
   setSoftLife: React.Dispatch<React.SetStateAction<SoftEntry[]>>
+  currentMonth: string
 }
 
 const CAT_COLORS: Record<SoftCat, string> = {
@@ -36,7 +38,7 @@ const BLANK: SoftForm = {
   note:     '',
 }
 
-export function SoftLifeTab({ softLife, setSoftLife }: Props) {
+export function SoftLifeTab({ softLife, setSoftLife, currentMonth }: Props) {
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
   const [form,    setForm]    = useState<SoftForm>(BLANK)
@@ -44,14 +46,19 @@ export function SoftLifeTab({ softLife, setSoftLife }: Props) {
   const patch = <K extends keyof SoftForm>(k: K) =>
     (v: string) => setForm((prev) => ({ ...prev, [k]: v }))
 
-  const total = softLife.reduce((s, e) => s + e.amount, 0)
+  const visible = useMemo(() => softLife.filter((e) => e.date.startsWith(currentMonth)), [softLife, currentMonth])
+  const total = visible.reduce((s, e) => s + e.amount, 0)
 
   const catTotals = SOFT_CATS.map((cat) => ({
     cat,
-    total: softLife.filter((e) => e.category === cat).reduce((s, e) => s + e.amount, 0),
+    total: visible.filter((e) => e.category === cat).reduce((s, e) => s + e.amount, 0),
   })).filter((c) => c.total > 0)
 
-  const openNew = () => { setEditing(null); setForm(BLANK); setModal(true) }
+  const openNew = () => {
+    setEditing(null)
+    setForm({ ...BLANK, date: `${currentMonth}-${String(new Date().getDate()).padStart(2, '0')}` })
+    setModal(true)
+  }
   const openEdit = (item: SoftEntry) => {
     setEditing(item.id)
     setForm({ category: item.category, amount: String(item.amount), date: item.date, note: item.note })
@@ -80,7 +87,12 @@ export function SoftLifeTab({ softLife, setSoftLife }: Props) {
     <div className="fade-up">
       <SectionHead
         title="✨ Soft Life Fund"
-        sub={<>Total Spent: <strong style={{ color: '#F472B6' }}>{fmt(total)}</strong></>}
+        sub={
+          <>
+            <span style={{ display: 'block', marginBottom: 4 }}>{formatMonthLabel(currentMonth)}</span>
+            Total Spent: <strong style={{ color: '#F472B6' }}>{fmt(total)}</strong>
+          </>
+        }
         action={<AddBtn label="+ Spend" onClick={openNew} />}
       />
 
@@ -104,15 +116,15 @@ export function SoftLifeTab({ softLife, setSoftLife }: Props) {
 
       {/* Entry list */}
       <div style={{ display: 'grid', gap: '0.625rem' }}>
-        {softLife.length === 0 && (
+        {visible.length === 0 && (
           <Card>
             <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem', fontSize: '0.9rem' }}>
-              No soft life spending yet. Live a little.
+              No soft life spending for {formatMonthLabel(currentMonth)} yet.
             </div>
           </Card>
         )}
 
-        {[...softLife].sort((a, b) => b.date.localeCompare(a.date)).map((item) => (
+        {[...visible].sort((a, b) => b.date.localeCompare(a.date)).map((item) => (
           <Card key={item.id} className="money-list-card" style={{ display: 'flex', gap: '0.875rem', padding: '0.875rem 1.125rem' }}>
             <div style={{ fontSize: 22, flexShrink: 0 }}>{CAT_EMOJI[item.category]}</div>
             <div style={{ flex: 1, minWidth: 0 }}>

@@ -43,6 +43,13 @@ export interface IncomeEntry {
   type: IncomeType
 }
 
+/** Per-calendar-month bill payment record (recurring template). */
+export interface ExpensePaidMonth {
+  paid: boolean
+  /** Optional override when paid differs from template amount */
+  actualAmount?: number
+}
+
 export interface Expense {
   id: string
   name: string
@@ -51,6 +58,7 @@ export interface Expense {
   type: ExpenseType
   billingDate: string
   status: ExpenseStatus
+  paidByMonth?: Record<string, ExpensePaidMonth>
 }
 
 export interface Debt {
@@ -61,6 +69,8 @@ export interface Debt {
   minPayment: number
   priority: DebtPriority
   status: DebtStatus
+  /** Snapshot of balance at month-end when closing a month */
+  balanceByMonth?: Record<string, number>
 }
 
 export interface SoftEntry {
@@ -116,6 +126,16 @@ export interface SoftForm {
 
 // ─── Dashboard aggregated data passed as a prop ───────────────────────────────
 
+export interface MonthlyHistorySeries {
+  /** Six month keys oldest → newest */
+  months: string[]
+  income: number[]
+  spend: number[]
+  /** Total active debt; null if no snapshot for that month */
+  debtTotal: (number | null)[]
+  savings: (number | null)[]
+}
+
 export interface DashboardData {
   savingsGoal: number
   savingsActual: number
@@ -129,6 +149,10 @@ export interface DashboardData {
   remaining: number
   totalDebt: number
   healthScore: number
+  totalOrigDebt: number
+  currentMonth: string
+  currentMonthLabel: string
+  history: MonthlyHistorySeries
 }
 
 // ─── Misc UI ──────────────────────────────────────────────────────────────────

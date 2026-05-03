@@ -1,7 +1,6 @@
-import { TOTAL_ORIG_DEBT } from '@/constants'
 import { LEVELS, getLevel, getNextLevel } from '@/utils/gamification'
 import { fmt } from '@/utils/format'
-import { VinylRecord, Card, Bar, Pill } from '@/components/ui'
+import { VinylRecord, Card, Bar, Pill, Sparkline } from '@/components/ui'
 import type { DashboardData, SummaryCard } from '@/types'
 
 interface Props {
@@ -13,13 +12,14 @@ export function DashboardTab({ data }: Props) {
     savingsGoal, savingsActual, setSavingsGoal, setSavingsActual,
     totalIncome, totalBills, totalSubs, totalDebtMin,
     totalSoft, remaining, totalDebt, healthScore,
+    totalOrigDebt, currentMonthLabel, history,
   } = data
 
   const level     = getLevel(healthScore)
   const nextLevel = getNextLevel(healthScore)
   const savingsPct = savingsGoal > 0 ? Math.min(100, (savingsActual / savingsGoal) * 100) : 0
-  const debtPaid   = Math.max(0, TOTAL_ORIG_DEBT - totalDebt)
-  const debtPct    = Math.min(100, (debtPaid / TOTAL_ORIG_DEBT) * 100)
+  const debtPaid   = Math.max(0, totalOrigDebt - totalDebt)
+  const debtPct    = Math.min(100, (debtPaid / totalOrigDebt) * 100)
 
   const summaryCards: SummaryCard[] = [
     { label: 'Income',        emoji: '💰', val: totalIncome,  color: '#10B981' },
@@ -42,7 +42,7 @@ export function DashboardTab({ data }: Props) {
       {/* ── Hero ── */}
       <div className="dash-hero" style={{ textAlign: 'center', padding: 'clamp(1.5rem, 5vw, 2.5rem) 0 clamp(1.25rem, 4vw, 2rem)', borderBottom: '1px solid var(--border)', marginBottom: 'clamp(1.25rem, 4vw, 2rem)' }}>
         <div style={{ fontSize: '0.68rem', letterSpacing: '0.2em', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>
-          Monthly Snapshot
+          Monthly Snapshot · {currentMonthLabel}
         </div>
         <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.6rem, 4vw, 2.75rem)', fontStyle: 'italic', lineHeight: 1.25, marginBottom: '1.25rem', color: 'var(--text)' }}>
           "Control the money,<br />or it controls me."
@@ -99,7 +99,7 @@ export function DashboardTab({ data }: Props) {
             {fmt(totalDebt)}{' '}
             <span style={{ fontSize: '1rem', color: 'var(--muted)' }}>left</span>
           </div>
-          <Bar value={debtPaid} max={TOTAL_ORIG_DEBT} color="#FB7185" h={7} />
+          <Bar value={debtPaid} max={totalOrigDebt} color="#FB7185" h={7} />
           <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.4rem' }}>
             {debtPct.toFixed(0)}% of static cleared
           </div>
@@ -137,6 +137,29 @@ export function DashboardTab({ data }: Props) {
           </div>
         ))}
       </div>
+
+      {/* ── Last 6 months ── */}
+      <Card style={{ marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: '0.68rem', letterSpacing: '0.15em', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '1rem' }}>
+          Last 6 months
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
+          {[
+            { label: 'Income', color: '#10B981', pts: history.income },
+            { label: 'Paid spend', color: '#F59E0B', pts: history.spend },
+            { label: 'Debt left', color: '#FB7185', pts: history.debtTotal },
+            { label: 'Savings', color: '#06B6D4', pts: history.savings },
+          ].map((row) => (
+            <div key={row.label}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--muted)', marginBottom: '0.35rem' }}>{row.label}</div>
+              <Sparkline points={row.pts} color={row.color} width={140} height={40} />
+              <div style={{ fontSize: '0.58rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+                Oldest ← → Newest ({history.months.length} mo.)
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* ── DJ Career Path ── */}
       <Card>
