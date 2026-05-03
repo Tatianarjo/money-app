@@ -1,6 +1,9 @@
 import type { CSSProperties } from 'react'
 import { Card } from '@/components/ui'
+import { FEEDBACK_FORM_URL } from '@/constants/feedback'
 import { LEVELS } from '@/utils/gamification'
+
+const feedbackReady = FEEDBACK_FORM_URL.startsWith('http')
 
 const sectionTitle: CSSProperties = {
   fontSize: '0.68rem',
@@ -96,10 +99,31 @@ export function HelpContent() {
       </p>
 
       <div style={sectionTitle}>Install on iPhone</div>
-      <p style={{ ...body, marginBottom: 0 }}>
+      <p style={body}>
         Deploy or open the app over <strong>HTTPS</strong>. In Safari, tap <strong>Share</strong>, then{' '}
         <strong>Add to Home Screen</strong> to open Money HQ like a standalone app.
       </p>
+
+      <div style={sectionTitle}>Privacy and feedback</div>
+      <p style={{ ...body, marginBottom: '0.75rem' }}>
+        <strong style={{ display: 'block', fontWeight: 800, marginBottom: '0.5rem' }}>
+          Your budget numbers stay on your phone. The feedback form only saves what you type there — not your balances or
+          entries from this app.
+        </strong>
+        Income, bills, debt, and soft life live only in this browser unless you export or import JSON yourself.
+      </p>
+      {feedbackReady ? (
+        <p style={{ ...body, marginBottom: 0 }}>
+          <a
+            href={FEEDBACK_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--accent)', fontWeight: 700 }}
+          >
+            Send feedback (opens in new tab)
+          </a>
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -5,14 +5,27 @@ interface Props {
   onClose: () => void
   title: string
   children: ReactNode
+  /** When false, clicking the backdrop does not close (e.g. first-run welcome). Default true. */
+  closeOnBackdrop?: boolean
+  /** When false, hides the × control (use an explicit button in children to dismiss). Default true. */
+  showCloseButton?: boolean
 }
 
-export function Modal({ open, onClose, title, children }: Props) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  closeOnBackdrop = true,
+  showCloseButton = true,
+}: Props) {
   if (!open) return null
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      onClick={(e) => {
+        if (closeOnBackdrop && e.target === e.currentTarget) onClose()
+      }}
       style={{
         position: 'fixed', inset: 0, zIndex: 999,
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)',
@@ -29,16 +42,19 @@ export function Modal({ open, onClose, title, children }: Props) {
         overflowY: 'auto',
         animation: 'slideUp 0.25s ease',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h3 style={{ margin: 0, fontFamily: 'var(--serif)', fontSize: '1.2rem', color: 'var(--text)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '0.75rem' }}>
+          <h3 style={{ margin: 0, fontFamily: 'var(--serif)', fontSize: '1.2rem', color: 'var(--text)', flex: 1 }}>
             {title}
           </h3>
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, padding: '0.25rem' }}
-          >
-            ×
-          </button>
+          {showCloseButton ? (
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1, padding: '0.25rem' }}
+            >
+              ×
+            </button>
+          ) : null}
         </div>
         {children}
       </div>

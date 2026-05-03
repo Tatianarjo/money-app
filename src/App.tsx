@@ -14,6 +14,7 @@ import { HelpContent } from '@/components/HelpContent'
 import { PrintableReport } from '@/components/PrintableReport'
 import { DashboardTab, IncomeTab, BillsTab, DebtTab, SoftLifeTab } from '@/components/tabs'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { WelcomePrivacyModal } from '@/components/WelcomePrivacyModal'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
 import { migrateDebts, migrateExpenses } from '@/utils/migrations'
 import { shiftMonth, formatMonthLabel, monthKeyNow } from '@/utils/month'
@@ -73,6 +74,7 @@ export default function App() {
   const [savingsByMonth, setSavingsByMonth] = usePersistedState<Record<string, number>>('savingsByMonth', {})
   const [totalOrigDebt,  setTotalOrigDebt]  = usePersistedState<number>('totalOrigDebt', DEFAULT_TOTAL_ORIG_DEBT)
   const [helpSeen,       setHelpSeen]       = usePersistedState<boolean>('helpSeen', false)
+  const [welcomePrivacySeen, setWelcomePrivacySeen] = usePersistedState<boolean>('welcomePrivacySeen', false)
 
   const [tab, setTab] = useState<TabId>('dashboard')
   const [showDataModal, setShowDataModal] = useState(false)
@@ -510,6 +512,8 @@ export default function App() {
       <Drawer open={showHelp} onClose={() => setShowHelp(false)} title="How Money HQ works" panelId="help-drawer">
         <HelpContent />
       </Drawer>
+
+      <WelcomePrivacyModal open={!welcomePrivacySeen} onDismiss={() => setWelcomePrivacySeen(true)} />
     </div>
   )
 }
