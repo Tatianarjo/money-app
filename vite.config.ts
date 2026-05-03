@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
+/** GitHub Pages project URL: https://<user>.github.io/<repo>/ — must match the repo name segment. */
+const basePath = '/money-app'
+const base = `${basePath}/`
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -20,17 +25,17 @@ export default defineConfig({
         background_color: '#080808',
         display: 'standalone',
         orientation: 'portrait-primary',
-        scope: '/',
-        start_url: '/',
+        scope: base,
+        start_url: base,
         icons: [
           {
-            src: '/icon.svg',
+            src: `${basePath}/icon.svg`,
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'any',
           },
           {
-            src: '/icon.svg',
+            src: `${basePath}/icon.svg`,
             sizes: '512x512',
             type: 'image/svg+xml',
             purpose: 'maskable',
