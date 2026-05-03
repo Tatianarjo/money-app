@@ -30,9 +30,14 @@ export function WelcomePrivacyModal({ open, onDismiss }: Props) {
           Your budget numbers stay on your phone. The feedback form only saves what you type there — not your balances or
           entries from this app.
         </strong>
-        Money HQ keeps income, bills, debt, and soft life only in this browser on this device. Nothing is sent to our
+        Money HQ keeps income, bills, debt, and soft life only in this browser on this device — not on Money HQ&apos;s
         servers. If you use <strong>Export JSON</strong> or <strong>Import</strong>, that file is yours — share it only if
         you choose to.
+      </p>
+
+      <p style={{ margin: '0 0 1.25rem', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+        This site uses <strong>Google Analytics</strong> for approximate traffic and region (standard web metrics). That
+        does <strong>not</strong> include your budget entries or amounts.
       </p>
 
       <p style={{ margin: '0 0 1.25rem', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.6 }}>

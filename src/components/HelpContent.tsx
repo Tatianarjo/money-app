@@ -110,7 +110,9 @@ export function HelpContent() {
           Your budget numbers stay on your phone. The feedback form only saves what you type there — not your balances or
           entries from this app.
         </strong>
-        Income, bills, debt, and soft life live only in this browser unless you export or import JSON yourself.
+        Income, bills, debt, and soft life live only in this browser unless you export or import JSON yourself.{' '}
+        <strong>Google Analytics</strong> runs on the site for approximate traffic and region; it does not receive your
+        budget numbers from this app.
       </p>
       {feedbackReady ? (
         <p style={{ ...body, marginBottom: 0 }}>
