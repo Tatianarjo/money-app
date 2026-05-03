@@ -88,9 +88,11 @@ export function HelpContent() {
       <div style={sectionTitle}>Data and backup</div>
       <p style={body}>
         Open <strong>Data</strong> to <strong>export</strong> a JSON file (move your data to another device) or{' '}
-        <strong>import</strong> a file you exported earlier—the app reloads after import. The <strong>debt payoff
-        baseline</strong> is the starting total used for the payoff progress bar; adjust it if your real starting debt
-        was different. <strong>Reset everything</strong> wipes all entries and starts fresh—use with care.
+        <strong>import</strong> a file you exported earlier—the app reloads after import. Tap{' '}
+        <strong>Print / Save as PDF</strong> in Data to print a full statement. On iPhone, choose{' '}
+        <strong>Save to Files</strong> in the Share sheet to keep a PDF copy. The <strong>debt payoff baseline</strong>{' '}
+        is the starting total used for the payoff progress bar; adjust it if your real starting debt was different.{' '}
+        <strong>Reset everything</strong> wipes all entries and starts fresh—use with care.
       </p>
 
       <div style={sectionTitle}>Install on iPhone</div>

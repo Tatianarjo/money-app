@@ -11,6 +11,7 @@ import {
 } from '@/constants'
 import { VinylRecord, Modal, Pill, Drawer } from '@/components/ui'
 import { HelpContent } from '@/components/HelpContent'
+import { PrintableReport } from '@/components/PrintableReport'
 import { DashboardTab, IncomeTab, BillsTab, DebtTab, SoftLifeTab } from '@/components/tabs'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
@@ -76,6 +77,7 @@ export default function App() {
   const [tab, setTab] = useState<TabId>('dashboard')
   const [showDataModal, setShowDataModal] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [reportGeneratedAt, setReportGeneratedAt] = useState(() => new Date())
   const [origDebtDraft, setOrigDebtDraft] = useState(String(totalOrigDebt))
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -370,6 +372,22 @@ export default function App() {
         </main>
       </ErrorBoundary>
 
+      <div className="print-mount" aria-hidden>
+        <PrintableReport
+          generatedAt={reportGeneratedAt}
+          currentMonth={currentMonth}
+          income={income}
+          expenses={expenses}
+          debts={debts}
+          softLife={softLife}
+          savingsGoal={savingsGoal}
+          savingsActual={savingsActual}
+          savingsByMonth={savingsByMonth}
+          totalOrigDebt={totalOrigDebt}
+          healthScore={healthScore}
+        />
+      </div>
+
       <input ref={importRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={onImportPick} />
 
       <Modal open={showDataModal} onClose={() => setShowDataModal(false)} title="💾 Data & backup">
@@ -409,6 +427,27 @@ export default function App() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+          <button
+            type="button"
+            onClick={() => {
+              setReportGeneratedAt(new Date())
+              setShowDataModal(false)
+              setTimeout(() => window.print(), 50)
+            }}
+            style={{
+              padding: '0.65rem 1rem',
+              border: '1px solid var(--border)',
+              borderRadius: '0.75rem',
+              background: 'var(--card2)',
+              color: 'var(--text)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--sans)',
+              fontSize: '0.88rem',
+            }}
+          >
+            Print / Save as PDF
+          </button>
           <button
             type="button"
             onClick={exportJson}

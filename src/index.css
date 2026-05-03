@@ -370,3 +370,80 @@ body {
 .fade-up {
   animation: fadeUp 0.35s ease;
 }
+
+/* ─── Print / Save as PDF (full statement) ─── */
+
+.print-mount {
+  display: none;
+}
+
+@media print {
+  .app-shell > *:not(.print-mount) {
+    display: none !important;
+  }
+
+  .print-mount {
+    display: block !important;
+  }
+
+  .print-root,
+  .print-root * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+  }
+
+  .print-root {
+    padding: 16px;
+    font-family: var(--sans);
+    font-size: 11pt;
+  }
+
+  .print-root h1 {
+    font-family: var(--serif);
+    font-size: 20pt;
+    margin-bottom: 6pt;
+  }
+
+  .print-root h2 {
+    font-family: var(--serif);
+    font-size: 14pt;
+    margin: 14pt 0 6pt;
+    page-break-after: avoid;
+  }
+
+  .print-root table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12pt;
+    page-break-inside: auto;
+  }
+
+  .print-root tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .print-root th,
+  .print-root td {
+    border: 1px solid #999;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-size: 10pt;
+  }
+
+  .print-root th {
+    background: #f3f3f3 !important;
+    font-weight: 700;
+  }
+
+  .print-root tfoot td {
+    font-weight: 700;
+    border-top: 2px solid #000;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}
