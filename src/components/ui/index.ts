@@ -1,5 +1,6 @@
 export { VinylRecord } from './VinylRecord'
 export { Modal }       from './Modal'
+export { Drawer }      from './Drawer'
 export { Field }       from './Field'
 export { Card }        from './Card'
 export { Bar }         from './Bar'

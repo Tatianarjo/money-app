@@ -9,7 +9,8 @@ import {
   INIT_SOFT,
   DEFAULT_TOTAL_ORIG_DEBT,
 } from '@/constants'
-import { VinylRecord, Modal, Pill } from '@/components/ui'
+import { VinylRecord, Modal, Pill, Drawer } from '@/components/ui'
+import { HelpContent } from '@/components/HelpContent'
 import { DashboardTab, IncomeTab, BillsTab, DebtTab, SoftLifeTab } from '@/components/tabs'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
@@ -70,9 +71,11 @@ export default function App() {
   const [currentMonth,   setCurrentMonth]   = usePersistedState<string>('currentMonth', monthKeyNow())
   const [savingsByMonth, setSavingsByMonth] = usePersistedState<Record<string, number>>('savingsByMonth', {})
   const [totalOrigDebt,  setTotalOrigDebt]  = usePersistedState<number>('totalOrigDebt', DEFAULT_TOTAL_ORIG_DEBT)
+  const [helpSeen,       setHelpSeen]       = usePersistedState<boolean>('helpSeen', false)
 
   const [tab, setTab] = useState<TabId>('dashboard')
   const [showDataModal, setShowDataModal] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [origDebtDraft, setOrigDebtDraft] = useState(String(totalOrigDebt))
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -290,6 +293,34 @@ export default function App() {
         <div className="app-header-tools">
           <button
             type="button"
+            onClick={() => {
+              setShowHelp(true)
+              setHelpSeen(true)
+            }}
+            className="touch-target"
+            aria-expanded={showHelp}
+            aria-controls="help-drawer"
+            style={{ position: 'relative', background: 'none', border: '1px solid var(--border)', borderRadius: '0.6rem', padding: '0 0.75rem', color: 'var(--muted)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--sans)' }}
+          >
+            ? Help
+            {!helpSeen && (
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 6,
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: 'var(--accent)',
+                  boxShadow: '0 0 0 2px var(--bg)',
+                }}
+              />
+            )}
+          </button>
+          <button
+            type="button"
             onClick={() => setShowDataModal(true)}
             className="touch-target"
             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '0.6rem', padding: '0 0.75rem', color: 'var(--muted)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--sans)' }}
@@ -413,6 +444,10 @@ export default function App() {
           </button>
         </div>
       </Modal>
+
+      <Drawer open={showHelp} onClose={() => setShowHelp(false)} title="How Money HQ works" panelId="help-drawer">
+        <HelpContent />
+      </Drawer>
     </div>
   )
 }
