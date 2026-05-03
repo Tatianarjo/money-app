@@ -18,9 +18,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
       },
       manifest: {
-        name: 'Money HQ',
+        name: 'Money HQ — Your Budget Assistant',
         short_name: 'Money HQ',
-        description: 'Personal finance HQ — income, bills, debt, and soft life.',
+        description: 'Your Budget Assistant — income, bills, debt, and soft life in one place.',
         theme_color: '#F59E0B',
         background_color: '#080808',
         display: 'standalone',

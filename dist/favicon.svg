@@ -1,6 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Money HQ">
-  <rect width="100" height="100" rx="14" fill="#080808"/>
-  <text x="50" y="40" text-anchor="middle" fill="#F59E0B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="700">Money</text>
-  <text x="50" y="58" text-anchor="middle" fill="#F59E0B" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="700">HQ</text>
-  <circle cx="50" cy="78" r="5" fill="#F59E0B"/>
+  <rect width="100" height="100" rx="20" fill="#080808"/>
+  <circle cx="50" cy="50" r="34" fill="#111"/>
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#1e1e1e" stroke-width="0.8"/>
+  <circle cx="50" cy="50" r="22" fill="none" stroke="#1e1e1e" stroke-width="0.8"/>
+  <circle cx="50" cy="50" r="14" fill="#C97706"/>
+  <circle cx="50" cy="50" r="11" fill="#A45E04"/>
+  <circle cx="50" cy="50" r="3" fill="#050505"/>
+  <circle cx="50" cy="50" r="36" fill="none" stroke="#F59E0B" stroke-width="2" opacity="0.85" stroke-dasharray="56 170" stroke-linecap="round" transform="rotate(-90 50 50)"/>
 </svg>

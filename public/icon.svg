@@ -1,7 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Money HQ">
-  <rect width="512" height="512" rx="96" fill="#080808"/>
-  <circle cx="256" cy="256" r="168" fill="none" stroke="#F59E0B" stroke-width="10"/>
-  <circle cx="256" cy="256" r="128" fill="none" stroke="#F59E0B" stroke-width="4" opacity="0.45"/>
-  <circle cx="256" cy="256" r="88" fill="none" stroke="#F59E0B" stroke-width="4" opacity="0.35"/>
-  <circle cx="256" cy="256" r="28" fill="#F59E0B"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Money HQ — Your Budget Assistant">
+  <defs>
+    <linearGradient id="pwaVinylRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#FB7185"/>
+    </linearGradient>
+  </defs>
+  <!-- Full bleed for maskable / adaptive icons -->
+  <rect width="512" height="512" rx="112" fill="#080808"/>
+
+  <!-- Vinyl (matches in-app VinylRecord look) -->
+  <circle cx="256" cy="168" r="126" fill="#111"/>
+  <circle cx="256" cy="168" r="108" fill="none" stroke="#1e1e1e" stroke-width="2"/>
+  <circle cx="256" cy="168" r="92" fill="none" stroke="#1e1e1e" stroke-width="2"/>
+  <circle cx="256" cy="168" r="76" fill="none" stroke="#1e1e1e" stroke-width="2"/>
+  <circle cx="256" cy="168" r="60" fill="none" stroke="#1e1e1e" stroke-width="2"/>
+  <circle cx="256" cy="168" r="118" fill="none" stroke="url(#pwaVinylRim)" stroke-width="7" stroke-dasharray="420 360" stroke-linecap="round" transform="rotate(-88 256 168)"/>
+  <circle cx="256" cy="168" r="48" fill="#C97706"/>
+  <circle cx="256" cy="168" r="40" fill="#A45E04"/>
+  <circle cx="256" cy="168" r="11" fill="#050505"/>
+  <text x="256" y="162" text-anchor="middle" fill="#FEF3C7" font-size="13" font-weight="700" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="0.12em">MONEY</text>
+  <text x="256" y="182" text-anchor="middle" fill="#FEF3C7" font-size="13" font-weight="700" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" letter-spacing="0.35em">HQ</text>
+
+  <!-- Homescreen title + tagline (iOS/Android show icon; name comes from manifest — this bakes tagline into the artwork) -->
+  <text x="256" y="312" text-anchor="middle" fill="#f4ede4" font-size="34" font-weight="700" font-family="Georgia, 'Times New Roman', serif">Money HQ</text>
+  <text x="256" y="352" text-anchor="middle" fill="#F59E0B" font-size="16" font-weight="600" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">Your Budget Assistant</text>
 </svg>
