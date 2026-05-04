@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { LEVELS, getLevel, getNextLevel } from '@/utils/gamification'
 import { fmt } from '@/utils/format'
+import { TourPosterModal } from '@/components/TourPosterModal'
 import { VinylRecord, Card, Bar, Pill, Sparkline } from '@/components/ui'
 import type { DashboardData, SummaryCard } from '@/types'
 
@@ -13,7 +15,17 @@ export function DashboardTab({ data }: Props) {
     totalIncome, totalBills, totalSubs, totalDebtMin,
     totalSoft, remaining, totalDebt, healthScore,
     totalOrigDebt, currentMonthLabel, history,
+    hasIncomeDrop,
+    dark,
+    hqShowcasePoints,
+    hqLoginPointClaimed,
+    hqFirstIncomePointClaimed,
+    hqShowcaseIntroDone,
+    dueSoon,
+    goToBillsTab,
   } = data
+
+  const [showTourPoster, setShowTourPoster] = useState(false)
 
   const level     = getLevel(healthScore)
   const nextLevel = getNextLevel(healthScore)
@@ -37,8 +49,58 @@ export function DashboardTab({ data }: Props) {
     },
   ]
 
+  const maxShowcase = 2
+
   return (
     <div className="fade-up">
+      {hqShowcaseIntroDone ? (
+        <Card
+          className="hq-showcase-game"
+          style={{
+            marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
+            padding: 'clamp(1rem, 3vw, 1.35rem)',
+            border: '2px solid var(--accent)',
+            boxShadow: '0 0 0 1px rgba(245, 158, 11, 0.25), 0 10px 36px rgba(245, 158, 11, 0.12)',
+            background: 'linear-gradient(145deg, var(--card) 0%, var(--card2) 100%)',
+          }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.65rem' }}>
+            <div>
+              <div style={{ fontSize: '0.62rem', letterSpacing: '0.2em', color: '#EC4899', fontWeight: 800, textTransform: 'uppercase' }}>
+                🎮 HQ Showcase
+              </div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', color: 'var(--text)', marginTop: 2 }}>
+                Earn points · unlock tour poster
+              </div>
+            </div>
+            <div
+              style={{
+                padding: '0.4rem 0.9rem',
+                borderRadius: '2rem',
+                background: 'var(--accent)',
+                color: 'var(--on-accent)',
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                fontFamily: 'var(--sans)',
+                boxShadow: '0 4px 16px rgba(245, 158, 11, 0.35)',
+              }}
+            >
+              {hqShowcasePoints}/{maxShowcase} pts
+            </div>
+          </div>
+          <Bar value={hqShowcasePoints} max={maxShowcase} color="#EC4899" h={8} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.65rem', fontSize: '0.72rem', color: 'var(--muted)' }}>
+            <span style={{ color: hqLoginPointClaimed ? '#10B981' : 'var(--muted)', fontWeight: 700 }}>
+              {hqLoginPointClaimed ? '✓' : '○'} Login (+1)
+            </span>
+            <span style={{ color: 'var(--border)', fontWeight: 300 }}>|</span>
+            <span style={{ color: hqFirstIncomePointClaimed ? '#10B981' : 'var(--muted)', fontWeight: 700 }}>
+              {hqFirstIncomePointClaimed ? '✓' : '○'} First income drop (+1)
+            </span>
+          </div>
+        </Card>
+      ) : null}
+
       {/* ── Hero ── */}
       <div className="dash-hero" style={{ textAlign: 'center', padding: 'clamp(1.5rem, 5vw, 2.5rem) 0 clamp(1.25rem, 4vw, 2rem)', borderBottom: '1px solid var(--border)', marginBottom: 'clamp(1.25rem, 4vw, 2rem)' }}>
         <div style={{ fontSize: '0.68rem', letterSpacing: '0.2em', color: 'var(--accent)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>
@@ -56,7 +118,138 @@ export function DashboardTab({ data }: Props) {
           {remaining  < 0   && <Pill color="#EF4444">⚠️ In the Red</Pill>}
           {totalSubs  > 150 && <Pill color="#F59E0B">📡 Sub Overload</Pill>}
         </div>
+
+        {hasIncomeDrop ? (
+          <div style={{ marginTop: '1.1rem' }}>
+            <button
+              type="button"
+              onClick={() => setShowTourPoster(true)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                borderRadius: '1rem',
+                border: 'none',
+                background: 'linear-gradient(135deg, var(--accent) 0%, #EC4899 100%)',
+                color: 'var(--on-accent)',
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                fontFamily: 'var(--sans)',
+                letterSpacing: '0.04em',
+                boxShadow: '0 8px 28px rgba(236, 72, 153, 0.35), 0 0 0 2px rgba(245, 158, 11, 0.4)',
+              }}
+            >
+              🎪 OPEN TOUR POSTER — share your DJ level
+            </button>
+          </div>
+        ) : (
+          <p style={{ margin: '0.85rem auto 0', maxWidth: 440, fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.55 }}>
+            Add <strong>one income drop</strong> on the Income tab (+1 showcase point) to unlock the big{' '}
+            <strong>tour poster</strong> — score, level, points, and <strong style={{ color: '#EC4899' }}>Powered by eyeCODEGlitter</strong>{' '}
+            (money only if you opt in).
+          </p>
+        )}
       </div>
+
+      {/* ── Due soon (bills with a due day) ── */}
+      <Card
+        style={{
+          marginBottom: 'clamp(1rem, 3vw, 1.5rem)',
+          padding: 'clamp(1rem, 3vw, 1.25rem)',
+          border: '2px solid #F59E0B55',
+          boxShadow: '0 8px 28px rgba(245, 158, 11, 0.12)',
+        }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <div>
+            <div style={{ fontSize: '0.62rem', letterSpacing: '0.18em', color: '#F59E0B', fontWeight: 800, textTransform: 'uppercase' }}>
+              Due soon
+            </div>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.05rem', color: 'var(--text)', marginTop: 2 }}>
+              Bills for {currentMonthLabel}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={goToBillsTab}
+            style={{
+              padding: '0.45rem 0.85rem',
+              borderRadius: '2rem',
+              border: '1px solid var(--accent)',
+              background: 'var(--card2)',
+              color: 'var(--accent)',
+              fontWeight: 800,
+              fontSize: '0.72rem',
+              cursor: 'pointer',
+              fontFamily: 'var(--sans)',
+            }}
+          >
+            📋 Edit bills
+          </button>
+        </div>
+        <p style={{ margin: '0 0 0.85rem', fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+          Each bill uses a <strong>due day (1–31)</strong> on the Bills tab. When this header month matches today&apos;s
+          calendar month, you&apos;ll see <strong>today / overdue / days until due</strong> here.
+        </p>
+        {dueSoon.length === 0 ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '1.25rem 0.75rem',
+              borderRadius: '0.75rem',
+              background: 'var(--card2)',
+              border: '1px dashed var(--border)',
+              color: 'var(--muted)',
+              fontSize: '0.82rem',
+              lineHeight: 1.55,
+            }}
+          >
+            No bills with a valid due day yet. Open <strong>Bills</strong>, add a bill, and set <strong>Due day (1–31)</strong>.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {dueSoon.map((row) => (
+              <div
+                key={row.id}
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.5rem',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: '0.75rem',
+                  background: row.overdue ? '#EF444414' : 'var(--card2)',
+                  border: `1px solid ${row.overdue ? '#EF444455' : 'var(--border)'}`,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.88rem' }}>{row.name}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>
+                    {row.dueLine}
+                    {row.relativeLabel ? (
+                      <span style={{ marginLeft: 6, fontWeight: 700, color: row.overdue ? '#EF4444' : '#10B981' }}>
+                        · {row.relativeLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                  {row.paidThisMonth ? (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10B981' }}>Paid ✓</span>
+                  ) : row.overdue ? (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#EF4444' }}>Unpaid</span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--muted)' }}>Unpaid</span>
+                  )}
+                  <span style={{ fontFamily: 'var(--serif)', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)' }}>
+                    {fmt(row.amount)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* ── Vinyl + Progress Panels ── */}
       <Card className="dash-vinyl-card" style={{ marginBottom: '1.5rem', display: 'flex', gap: 'clamp(1.25rem, 4vw, 2rem)', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -201,6 +394,18 @@ export function DashboardTab({ data }: Props) {
             : 'Max level achieved. World tour secured. 🌍'}
         </div>
       </Card>
+
+      <TourPosterModal
+        open={showTourPoster}
+        onClose={() => setShowTourPoster(false)}
+        healthScore={healthScore}
+        level={level}
+        monthLabel={currentMonthLabel}
+        totalIncome={totalIncome}
+        remaining={remaining}
+        dark={dark}
+        hqShowcasePoints={hqShowcasePoints}
+      />
     </div>
   )
 }

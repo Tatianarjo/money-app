@@ -28,6 +28,7 @@ export const INCOME_TYPES: IncomeType[] = [
   'Salary',
   'DJ Gig',
   'Contract Work',
+  'UGC Campaign',
   'Other',
 ]
 

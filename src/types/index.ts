@@ -4,6 +4,7 @@ export type IncomeType =
   | 'Salary'
   | 'DJ Gig'
   | 'Contract Work'
+  | 'UGC Campaign'
   | 'Other'
 
 export type ExpenseCat =
@@ -59,6 +60,20 @@ export interface Expense {
   billingDate: string
   status: ExpenseStatus
   paidByMonth?: Record<string, ExpensePaidMonth>
+}
+
+/** One bill row for the Dashboard “Due soon” list (current budget month). */
+export interface DueSoonRow {
+  id: string
+  name: string
+  amount: number
+  day: number
+  /** Human-readable recurring due (e.g. “Due on the 15th of each month”) */
+  dueLine: string
+  /** Relative to today when the header month is this calendar month; otherwise null */
+  relativeLabel: string | null
+  overdue: boolean
+  paidThisMonth: boolean
 }
 
 export interface Debt {
@@ -153,6 +168,17 @@ export interface DashboardData {
   currentMonth: string
   currentMonthLabel: string
   history: MonthlyHistorySeries
+  /** At least one income row — unlocks tour poster to demo gamification */
+  hasIncomeDrop: boolean
+  dark: boolean
+  hqShowcasePoints: number
+  hqLoginPointClaimed: boolean
+  hqFirstIncomePointClaimed: boolean
+  /** Post–privacy gamify screen finished — show HQ showcase game UI */
+  hqShowcaseIntroDone: boolean
+  /** Bills with a valid due day (1–31), sorted overdue first when viewing this calendar month */
+  dueSoon: DueSoonRow[]
+  goToBillsTab: () => void
 }
 
 // ─── Misc UI ──────────────────────────────────────────────────────────────────

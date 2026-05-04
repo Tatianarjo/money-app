@@ -42,7 +42,8 @@ export function WelcomePrivacyModal({ open, onDismiss }: Props) {
 
       <p style={{ margin: '0 0 1.25rem', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.6 }}>
         We&apos;d love quick notes from testers (what&apos;s confusing, what you&apos;d use weekly). That goes through the
-        form below — separate from your budget data.
+        form below — separate from your budget data. Next, a short <strong>HQ Showcase</strong> screen explains tour
+        posters, points, and sounds — continue with one tap.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>

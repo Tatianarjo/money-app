@@ -12,10 +12,11 @@ interface Props {
 }
 
 const TYPE_COLORS: Record<IncomeType, string> = {
-  Salary:          '#10B981',
-  'DJ Gig':        '#F59E0B',
-  'Contract Work': '#8B5CF6',
-  Other:           '#94A3B8',
+  Salary:           '#10B981',
+  'DJ Gig':         '#F59E0B',
+  'Contract Work':  '#8B5CF6',
+  'UGC Campaign':   '#EC4899',
+  Other:            '#94A3B8',
 }
 
 const BLANK: IncomeForm = {

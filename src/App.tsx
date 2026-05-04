@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistedState } from '@/hooks/usePersistedState'
 import { calcScore, getLevel } from '@/utils/gamification'
+import { playLevelUp, playNeedleDrop, sfxAllowed } from '@/utils/sounds'
 import { fmt } from '@/utils/format'
 import {
   INIT_INCOME,
@@ -15,16 +16,19 @@ import { PrintableReport } from '@/components/PrintableReport'
 import { DashboardTab, IncomeTab, BillsTab, DebtTab, SoftLifeTab } from '@/components/tabs'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { WelcomePrivacyModal } from '@/components/WelcomePrivacyModal'
+import { PostWelcomeGamifyModal } from '@/components/PostWelcomeGamifyModal'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
 import { migrateDebts, migrateExpenses } from '@/utils/migrations'
 import { shiftMonth, formatMonthLabel, monthKeyNow } from '@/utils/month'
 import { buildSixMonthHistory } from '@/utils/history'
+import { buildDueSoonList } from '@/utils/dueSoon'
 import {
   serializeBackup,
   parseBackupJson,
   applyBackupToLocalStorage,
   type BackupData,
 } from '@/utils/backup'
+import { store } from '@/utils/store'
 
 const DARK_THEME: ThemeStyle = {
   '--bg':        '#080808',
@@ -75,6 +79,14 @@ export default function App() {
   const [totalOrigDebt,  setTotalOrigDebt]  = usePersistedState<number>('totalOrigDebt', DEFAULT_TOTAL_ORIG_DEBT)
   const [helpSeen,       setHelpSeen]       = usePersistedState<boolean>('helpSeen', false)
   const [welcomePrivacySeen, setWelcomePrivacySeen] = usePersistedState<boolean>('welcomePrivacySeen', false)
+  const [postWelcomeGamifySeen, setPostWelcomeGamifySeen] = usePersistedState<boolean>('postWelcomeGamifySeen', false)
+  const [hqShowcasePoints, setHqShowcasePoints] = usePersistedState<number>('hqShowcasePoints', 0)
+  const [hqLoginPointClaimed, setHqLoginPointClaimed] = usePersistedState<boolean>('hqLoginPointClaimed', false)
+  const [hqFirstIncomePointClaimed, setHqFirstIncomePointClaimed] = usePersistedState<boolean>(
+    'hqFirstIncomePointClaimed',
+    false,
+  )
+  const [soundEffects, setSoundEffects] = usePersistedState<boolean>('soundEffects', false)
 
   const [tab, setTab] = useState<TabId>('dashboard')
   const [showDataModal, setShowDataModal] = useState(false)
@@ -82,6 +94,9 @@ export default function App() {
   const [reportGeneratedAt, setReportGeneratedAt] = useState(() => new Date())
   const [origDebtDraft, setOrigDebtDraft] = useState(String(totalOrigDebt))
   const importRef = useRef<HTMLInputElement>(null)
+  const levelSoundBootRef = useRef(true)
+  const prevLevelMinRef = useRef<number | null>(null)
+  const needleSessionRef = useRef(false)
 
   useEffect(() => {
     setOrigDebtDraft(String(totalOrigDebt))
@@ -117,6 +132,35 @@ export default function App() {
   const healthScore   = calcScore({ remaining, savingsPct, debtPct, totalSubs })
   const level         = getLevel(healthScore)
 
+  useEffect(() => {
+    const curMin = getLevel(healthScore).min
+    if (levelSoundBootRef.current) {
+      levelSoundBootRef.current = false
+      prevLevelMinRef.current = curMin
+      return
+    }
+    if (prevLevelMinRef.current !== null && curMin > prevLevelMinRef.current) {
+      void playLevelUp(soundEffects)
+    }
+    prevLevelMinRef.current = curMin
+  }, [healthScore, soundEffects])
+
+  useEffect(() => {
+    if (tab !== 'dashboard') return
+    if (needleSessionRef.current) return
+    if (!sfxAllowed(soundEffects)) return
+    needleSessionRef.current = true
+    void playNeedleDrop(soundEffects)
+  }, [tab, soundEffects])
+
+  useEffect(() => {
+    if (income.length < 1) return
+    if (store.get<boolean>('hqFirstIncomePointClaimed', false)) return
+    store.set('hqFirstIncomePointClaimed', true)
+    setHqFirstIncomePointClaimed(true)
+    setHqShowcasePoints((p) => p + 1)
+  }, [income.length, setHqFirstIncomePointClaimed, setHqShowcasePoints])
+
   const history = useMemo(
     () =>
       buildSixMonthHistory(
@@ -131,6 +175,8 @@ export default function App() {
       ),
     [currentMonth, income, softLife, expenses, debts, savingsByMonth, totalDebt, savingsActual],
   )
+
+  const dueSoon = useMemo(() => buildDueSoonList(expenses, currentMonth), [expenses, currentMonth])
 
   const handleReset = () => {
     setIncome(INIT_INCOME)
@@ -196,6 +242,15 @@ export default function App() {
     }
   }
 
+  const handleGamifyContinue = () => {
+    if (!store.get<boolean>('hqLoginPointClaimed', false)) {
+      store.set('hqLoginPointClaimed', true)
+      setHqLoginPointClaimed(true)
+      setHqShowcasePoints((p) => p + 1)
+    }
+    setPostWelcomeGamifySeen(true)
+  }
+
   const saveOrigDebtSetting = () => {
     const n = Number(origDebtDraft.replace(/,/g, ''))
     if (!Number.isFinite(n) || n <= 0) {
@@ -222,6 +277,14 @@ export default function App() {
     currentMonth,
     currentMonthLabel: formatMonthLabel(currentMonth),
     history,
+    hasIncomeDrop: income.length >= 1,
+    dark,
+    hqShowcasePoints,
+    hqLoginPointClaimed,
+    hqFirstIncomePointClaimed,
+    hqShowcaseIntroDone: postWelcomeGamifySeen,
+    dueSoon,
+    goToBillsTab: () => setTab('bills'),
   }
 
   const theme = dark ? DARK_THEME : LIGHT_THEME
@@ -298,6 +361,28 @@ export default function App() {
         </div>
 
         <div className="app-header-tools">
+          {postWelcomeGamifySeen ? (
+            <span
+              className="touch-target"
+              title="HQ Showcase points — earn up to 2 from login + first income drop"
+              style={{
+                padding: '0 0.65rem',
+                height: 32,
+                display: 'inline-flex',
+                alignItems: 'center',
+                borderRadius: '2rem',
+                border: '2px solid #EC4899',
+                background: 'linear-gradient(135deg, #EC489922, var(--accent)18)',
+                color: 'var(--text)',
+                fontSize: '0.72rem',
+                fontWeight: 900,
+                fontFamily: 'var(--sans)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              🎮 {hqShowcasePoints}/2
+            </span>
+          ) : null}
           <button
             type="button"
             onClick={() => {
@@ -420,6 +505,36 @@ export default function App() {
           Export a JSON file to move data between your phone and laptop. Import replaces everything in this browser and reloads the app.
         </p>
 
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.65rem',
+            marginBottom: '1.25rem',
+            padding: '1rem',
+            background: 'var(--card2)',
+            borderRadius: '0.75rem',
+            border: '1px solid var(--border)',
+            cursor: 'pointer',
+            fontSize: '0.88rem',
+            color: 'var(--text)',
+            lineHeight: 1.55,
+            fontFamily: 'var(--sans)',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={soundEffects}
+            onChange={(e) => setSoundEffects(e.target.checked)}
+            style={{ marginTop: 3, width: 18, height: 18, flexShrink: 0 }}
+          />
+          <span>
+            <strong>Sound effects</strong> — soft “needle drop” the first time you open the Dashboard each session, and a
+            short chime when your <strong>DJ career level</strong> goes up. Off by default; no sound if your device uses{' '}
+            <strong>reduced motion</strong>.
+          </span>
+        </label>
+
         <div style={{ marginBottom: '1.25rem', padding: '1rem', background: 'var(--card2)', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
             Debt payoff baseline
@@ -514,6 +629,10 @@ export default function App() {
       </Drawer>
 
       <WelcomePrivacyModal open={!welcomePrivacySeen} onDismiss={() => setWelcomePrivacySeen(true)} />
+      <PostWelcomeGamifyModal
+        open={welcomePrivacySeen && !postWelcomeGamifySeen}
+        onContinue={handleGamifyContinue}
+      />
     </div>
   )
 }

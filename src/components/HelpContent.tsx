@@ -66,9 +66,13 @@ export function HelpContent() {
         <strong>Bills</strong>
       </p>
       <p style={body}>
-        Bills are <strong>recurring templates</strong> (rent, phone, subscriptions). Amounts feed your dashboard totals.
-        Tap <strong>Mark paid</strong> when you have actually paid a bill this month so it shows up in the six-month
-        history. For subscriptions you can <strong>Cancel / Keep</strong> instead of deleting the row.
+        Bills are <strong>recurring templates</strong> (rent, phone, subscriptions). Each one needs a <strong>due day
+        (1–31)</strong> — the day of the month the charge usually hits — so you can see what&apos;s coming. Amounts feed
+        your dashboard totals. The <strong>Dashboard</strong> has a <strong>Due soon</strong> card that lists those bills
+        in order; when the month in the header matches today&apos;s calendar month, it also shows <strong>due today</strong>,{' '}
+        <strong>overdue</strong>, or <strong>due in X days</strong>. Tap <strong>Mark paid</strong> when you have actually
+        paid a bill this month so it shows up in the six-month history. For subscriptions you can{' '}
+        <strong>Cancel / Keep</strong> instead of deleting the row.
       </p>
 
       <p style={{ ...body, marginBottom: '0.5rem' }}>
@@ -102,6 +106,30 @@ export function HelpContent() {
       <p style={body}>
         Deploy or open the app over <strong>HTTPS</strong>. In Safari, tap <strong>Share</strong>, then{' '}
         <strong>Add to Home Screen</strong> to open Money HQ like a standalone app.
+      </p>
+
+      <div style={sectionTitle}>First visit: privacy, then the game</div>
+      <p style={body}>
+        The first pop-up is <strong>privacy</strong> (local data, feedback form, Google Analytics). Right after you confirm
+        it, a second screen introduces the <strong>HQ Showcase</strong>: you earn <strong>+1 point</strong> for tapping{' '}
+        <strong>Let&apos;s go</strong> (your login reward), and <strong>+1 point</strong> when you save your{' '}
+        <strong>first income drop</strong> on the Income tab. Watch the header badge <strong>🎮 X/2</strong> and the pink
+        progress card on the Dashboard — it&apos;s just for fun on this device.
+      </p>
+
+      <div style={sectionTitle}>Tour poster &amp; DJ sounds</div>
+      <p style={body}>
+        After your first income row, the Dashboard shows a big <strong>OPEN TOUR POSTER</strong> button. The poster includes{' '}
+        <strong>health score</strong>, <strong>DJ career level</strong>, <strong>showcase points</strong>, the month, and{' '}
+        <strong style={{ color: '#EC4899' }}>Powered by eyeCODEGlitter</strong> at the bottom. Dollar amounts stay{' '}
+        <strong>off the image</strong> unless you turn on <strong>Show money on the poster</strong> (clear opt-in with a
+        pink border). Download PNG or use Share where your phone supports it.
+      </p>
+      <p style={{ ...body, marginBottom: 0 }}>
+        In <strong>Data</strong>, turn on <strong>Sound effects</strong> for a soft <strong>needle drop</strong> once per
+        browser session the first time you open the <strong>Dashboard</strong> (while sounds are on), and a short{' '}
+        <strong>chime</strong> when your <strong>DJ career level</strong> goes up. Sounds stay off by default and never play
+        if your device prefers <strong>reduced motion</strong>.
       </p>
 
       <div style={sectionTitle}>Privacy and feedback</div>

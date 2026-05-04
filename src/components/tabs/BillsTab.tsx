@@ -4,6 +4,7 @@ import { fmt } from '@/utils/format'
 import { Card, SectionHead, AddBtn, EditBtn, DelBtn, Modal, Field, SaveCancel } from '@/components/ui'
 import type { Expense, ExpenseForm, ExpenseType, ExpenseStatus } from '@/types'
 import { formatMonthLabel } from '@/utils/month'
+import { parseBillingDayOfMonth } from '@/utils/dueSoon'
 
 interface Props {
   expenses: Expense[]
@@ -59,12 +60,17 @@ export function BillsTab({ expenses, setExpenses, currentMonth }: Props) {
 
   const save = () => {
     if (!form.name.trim() || !form.amount) return
+    const dom = parseBillingDayOfMonth(form.billingDate)
+    if (dom === null) {
+      alert('Enter a due day between 1 and 31 (the day of the month this bill is due).')
+      return
+    }
     const base = {
       name: form.name,
       amount: Number(form.amount),
       category: form.category,
       type: form.type,
-      billingDate: form.billingDate,
+      billingDate: String(dom),
       status: form.status,
     }
     if (editing) {
@@ -101,10 +107,13 @@ export function BillsTab({ expenses, setExpenses, currentMonth }: Props) {
   return (
     <div className="fade-up">
       <SectionHead
-        title="📋 The Bills Set"
+        title="📋 Your bills"
         sub={
           <>
-            <span style={{ display: 'block', marginBottom: 4 }}>{formatMonthLabel(currentMonth)} · Mark bills paid for history</span>
+            <span style={{ display: 'block', marginBottom: 4 }}>
+              {formatMonthLabel(currentMonth)} · Set a <strong>due day (1–31)</strong> so they show on the Dashboard{' '}
+              <strong>Due soon</strong> list · Mark paid for history
+            </span>
             Active: <strong style={{ color: '#F59E0B' }}>{fmt(activeTotal)}</strong>
             {' · '}
             Subs: <strong style={{ color: subsTotal > 150 ? '#EF4444' : '#06B6D4' }}>{fmt(subsTotal)}</strong>
@@ -155,7 +164,7 @@ export function BillsTab({ expenses, setExpenses, currentMonth }: Props) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, color: 'var(--text)', fontSize: '0.9rem' }}>{e.name}</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
-              {e.category} · Due: {e.billingDate || '—'}
+              {e.category} · Due day: {parseBillingDayOfMonth(e.billingDate) ?? '—'}
               {e.status !== 'Cancelled' && (
                 <span style={{ marginLeft: 8, color: e.paidByMonth?.[currentMonth]?.paid ? '#10B981' : 'var(--muted)', fontWeight: 700 }}>
                   {e.paidByMonth?.[currentMonth]?.paid ? ' · Paid this month' : ' · Unpaid'}
@@ -202,12 +211,17 @@ export function BillsTab({ expenses, setExpenses, currentMonth }: Props) {
         ))}
       </div>
 
-      <Modal open={modal} onClose={() => setModal(false)} title={editing ? 'Edit Expense' : 'New Expense'}>
-        <Field label="Name"                 value={form.name}        onChange={patch('name')}        placeholder="e.g. Netflix" />
+      <Modal open={modal} onClose={() => setModal(false)} title={editing ? 'Edit bill' : 'New bill'}>
+        <Field label="Bill name"            value={form.name}        onChange={patch('name')}        placeholder="e.g. Rent, Netflix" />
         <Field label="Amount ($)" type="number" value={form.amount} onChange={patch('amount')} />
         <Field label="Category"             value={form.category}    onChange={patch('category')}    options={EXPENSE_CATS} />
-        <Field label="Type"                 value={form.type}        onChange={patch('type')}        options={EXPENSE_TYPES} />
-        <Field label="Billing Day of Month" value={form.billingDate} onChange={patch('billingDate')} placeholder="e.g. 15" />
+        <Field label="Bill type"            value={form.type}        onChange={patch('type')}        options={EXPENSE_TYPES} />
+        <Field
+          label="Due day of month (1–31)"
+          value={form.billingDate}
+          onChange={patch('billingDate')}
+          placeholder="e.g. 1 or 15"
+        />
         <Field label="Status"               value={form.status}      onChange={patch('status')}      options={EXPENSE_STATUSES} />
         <SaveCancel onSave={save} onCancel={() => setModal(false)} />
       </Modal>
