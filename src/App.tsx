@@ -18,6 +18,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { WelcomePrivacyModal } from '@/components/WelcomePrivacyModal'
 import { PostWelcomeGamifyModal } from '@/components/PostWelcomeGamifyModal'
 import { BillDueTomorrowModal } from '@/components/BillDueTomorrowModal'
+import { DisplayNameModal } from '@/components/DisplayNameModal'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
 import { migrateDebts, migrateExpenses } from '@/utils/migrations'
 import { shiftMonth, formatMonthLabel, monthKeyNow } from '@/utils/month'
@@ -88,6 +89,8 @@ export default function App() {
     false,
   )
   const [soundEffects, setSoundEffects] = usePersistedState<boolean>('soundEffects', false)
+  const [displayName, setDisplayName] = usePersistedState<string>('displayName', '')
+  const [displayNameIntroSeen, setDisplayNameIntroSeen] = usePersistedState<boolean>('displayNameIntroSeen', false)
 
   const [tab, setTab] = useState<TabId>('dashboard')
   const [dueTomorrowOpen, setDueTomorrowOpen] = useState(false)
@@ -182,7 +185,7 @@ export default function App() {
   const dueSoon = useMemo(() => buildDueSoonList(expenses, currentMonth), [expenses, currentMonth])
 
   useEffect(() => {
-    if (!welcomePrivacySeen || !postWelcomeGamifySeen) return
+    if (!welcomePrivacySeen || !postWelcomeGamifySeen || !displayNameIntroSeen) return
     const tk = tomorrowDateKey()
     if (store.get<string>('dueTomorrowPopup', '') === tk) {
       setDueTomorrowOpen(false)
@@ -195,7 +198,7 @@ export default function App() {
     }
     setDueTomorrowBills(bills)
     setDueTomorrowOpen(true)
-  }, [expenses, welcomePrivacySeen, postWelcomeGamifySeen])
+  }, [expenses, welcomePrivacySeen, postWelcomeGamifySeen, displayNameIntroSeen])
 
   const dismissDueTomorrowPopup = () => {
     store.set('dueTomorrowPopup', tomorrowDateKey())
@@ -334,7 +337,13 @@ export default function App() {
             <div style={{ fontSize: '0.62rem', color: '#EC4899', fontWeight: 600, letterSpacing: '0.04em', marginTop: 2 }}>
               Your Budget Assistant
             </div>
-            <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 3 }}>
+            {displayName.trim() ? (
+              <div style={{ fontSize: '0.6rem', color: 'var(--muted)', marginTop: 4, fontWeight: 600, lineHeight: 1.35 }}>
+                <span style={{ color: 'var(--accent)' }}>{displayName.trim()}</span>
+                {' · '}for you · this device only
+              </div>
+            ) : null}
+            <div style={{ fontSize: '0.6rem', color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: displayName.trim() ? 5 : 3 }}>
               {level.icon} {level.name}
             </div>
           </div>
@@ -496,6 +505,12 @@ export default function App() {
           fontFamily: 'var(--sans)',
         }}
       >
+        {displayName.trim() ? (
+          <div style={{ marginBottom: '0.55rem', color: 'var(--muted)', fontWeight: 600, fontSize: '0.72rem' }}>
+            <span style={{ color: 'var(--accent)' }}>{displayName.trim()}</span>
+            {' — '}saved only in this browser for you
+          </div>
+        ) : null}
         <a
           href="https://eyecodeglitter.com"
           target="_blank"
@@ -528,6 +543,34 @@ export default function App() {
         <p style={{ color: 'var(--muted)', marginBottom: '1rem', lineHeight: 1.7, fontSize: '0.9rem' }}>
           Export a JSON file to move data between your phone and laptop. Import replaces everything in this browser and reloads the app.
         </p>
+
+        <div style={{ marginBottom: '1.25rem', padding: '1rem', background: 'var(--card2)', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+            Your name (header &amp; footer)
+          </div>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value.slice(0, 48))}
+            placeholder="First name or nickname"
+            maxLength={48}
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              padding: '0.55rem 0.65rem',
+              borderRadius: '0.6rem',
+              border: '1px solid var(--border)',
+              background: 'var(--input)',
+              color: 'var(--text)',
+              fontSize: '0.9rem',
+              fontFamily: 'var(--sans)',
+              marginBottom: '0.4rem',
+            }}
+          />
+          <div style={{ fontSize: '0.72rem', color: 'var(--muted)', lineHeight: 1.45 }}>
+            Stored only in this browser with your budget. Clear to hide the personalized lines.
+          </div>
+        </div>
 
         <label
           style={{
@@ -656,6 +699,16 @@ export default function App() {
       <PostWelcomeGamifyModal
         open={welcomePrivacySeen && !postWelcomeGamifySeen}
         onContinue={handleGamifyContinue}
+      />
+
+      <DisplayNameModal
+        open={postWelcomeGamifySeen && !displayNameIntroSeen}
+        defaultName={displayName}
+        onComplete={(name) => {
+          setDisplayName(name)
+          setDisplayNameIntroSeen(true)
+        }}
+        onSkip={() => setDisplayNameIntroSeen(true)}
       />
 
       <BillDueTomorrowModal

@@ -116,8 +116,10 @@ export function HelpContent() {
         The first pop-up is <strong>privacy</strong> (local data, feedback form, Google Analytics). Right after you confirm
         it, a second screen introduces the <strong>HQ Showcase</strong>: you earn <strong>+1 point</strong> for tapping{' '}
         <strong>Let&apos;s go</strong> (your login reward), and <strong>+1 point</strong> when you save your{' '}
-        <strong>first income drop</strong> on the Income tab. Watch the header badge <strong>🎮 X/2</strong> and the pink
-        progress card on the Dashboard — it&apos;s just for fun on this device.
+        <strong>first income drop</strong> on the Income tab. Then you can add an optional <strong>display name</strong>{' '}
+        (or skip) — it appears in the <strong>header</strong> and <strong>footer</strong> so this copy of the app feels
+        personal, still only stored in this browser. Change it anytime under <strong>Data</strong>. Watch the header badge{' '}
+        <strong>🎮 X/2</strong> and the pink progress card on the Dashboard — it&apos;s just for fun on this device.
       </p>
 
       <div style={sectionTitle}>Tour poster &amp; DJ sounds</div>
