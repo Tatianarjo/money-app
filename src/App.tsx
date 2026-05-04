@@ -17,11 +17,12 @@ import { DashboardTab, IncomeTab, BillsTab, DebtTab, SoftLifeTab } from '@/compo
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { WelcomePrivacyModal } from '@/components/WelcomePrivacyModal'
 import { PostWelcomeGamifyModal } from '@/components/PostWelcomeGamifyModal'
+import { BillDueTomorrowModal } from '@/components/BillDueTomorrowModal'
 import type { IncomeEntry, Expense, Debt, SoftEntry, TabId, TabDef, DashboardData, ThemeStyle } from '@/types'
 import { migrateDebts, migrateExpenses } from '@/utils/migrations'
 import { shiftMonth, formatMonthLabel, monthKeyNow } from '@/utils/month'
 import { buildSixMonthHistory } from '@/utils/history'
-import { buildDueSoonList } from '@/utils/dueSoon'
+import { buildDueSoonList, getBillsDueTomorrow, tomorrowDateKey } from '@/utils/dueSoon'
 import {
   serializeBackup,
   parseBackupJson,
@@ -89,6 +90,8 @@ export default function App() {
   const [soundEffects, setSoundEffects] = usePersistedState<boolean>('soundEffects', false)
 
   const [tab, setTab] = useState<TabId>('dashboard')
+  const [dueTomorrowOpen, setDueTomorrowOpen] = useState(false)
+  const [dueTomorrowBills, setDueTomorrowBills] = useState<Expense[]>([])
   const [showDataModal, setShowDataModal] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [reportGeneratedAt, setReportGeneratedAt] = useState(() => new Date())
@@ -177,6 +180,27 @@ export default function App() {
   )
 
   const dueSoon = useMemo(() => buildDueSoonList(expenses, currentMonth), [expenses, currentMonth])
+
+  useEffect(() => {
+    if (!welcomePrivacySeen || !postWelcomeGamifySeen) return
+    const tk = tomorrowDateKey()
+    if (store.get<string>('dueTomorrowPopup', '') === tk) {
+      setDueTomorrowOpen(false)
+      return
+    }
+    const bills = getBillsDueTomorrow(expenses)
+    if (!bills.length) {
+      setDueTomorrowOpen(false)
+      return
+    }
+    setDueTomorrowBills(bills)
+    setDueTomorrowOpen(true)
+  }, [expenses, welcomePrivacySeen, postWelcomeGamifySeen])
+
+  const dismissDueTomorrowPopup = () => {
+    store.set('dueTomorrowPopup', tomorrowDateKey())
+    setDueTomorrowOpen(false)
+  }
 
   const handleReset = () => {
     setIncome(INIT_INCOME)
@@ -632,6 +656,13 @@ export default function App() {
       <PostWelcomeGamifyModal
         open={welcomePrivacySeen && !postWelcomeGamifySeen}
         onContinue={handleGamifyContinue}
+      />
+
+      <BillDueTomorrowModal
+        open={dueTomorrowOpen}
+        bills={dueTomorrowBills}
+        onDismiss={dismissDueTomorrowPopup}
+        onGoToBills={() => setTab('bills')}
       />
     </div>
   )

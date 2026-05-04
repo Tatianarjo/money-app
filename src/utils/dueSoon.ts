@@ -1,5 +1,32 @@
 import type { Expense, DueSoonRow } from '@/types'
 
+/** Local calendar date for tomorrow (YYYY-MM-DD), noon to reduce DST edge cases. */
+export function tomorrowDateKey(): string {
+  const t = new Date()
+  t.setHours(12, 0, 0, 0)
+  t.setDate(t.getDate() + 1)
+  const y = t.getFullYear()
+  const m = String(t.getMonth() + 1).padStart(2, '0')
+  const d = String(t.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/**
+ * Bills whose recurring due day matches **tomorrow’s** calendar day-of-month (active only).
+ * E.g. tomorrow is the 5th → any bill with due day 5.
+ */
+export function getBillsDueTomorrow(expenses: Expense[]): Expense[] {
+  const t = new Date()
+  t.setHours(12, 0, 0, 0)
+  t.setDate(t.getDate() + 1)
+  const dom = t.getDate()
+  return expenses.filter((e) => {
+    if (e.status !== 'Active') return false
+    const b = parseBillingDayOfMonth(e.billingDate)
+    return b === dom
+  })
+}
+
 /** Parse billing day of month (1–31) from stored string; invalid → null. */
 export function parseBillingDayOfMonth(raw: string): number | null {
   const n = parseInt(String(raw).trim(), 10)

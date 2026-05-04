@@ -9,6 +9,8 @@ interface Props {
   closeOnBackdrop?: boolean
   /** When false, hides the × control (use an explicit button in children to dismiss). Default true. */
   showCloseButton?: boolean
+  /** Stacking order for overlay (e.g. reminders above welcome modals). Default 999. */
+  zIndex?: number
 }
 
 export function Modal({
@@ -18,6 +20,7 @@ export function Modal({
   children,
   closeOnBackdrop = true,
   showCloseButton = true,
+  zIndex = 999,
 }: Props) {
   if (!open) return null
 
@@ -27,7 +30,7 @@ export function Modal({
         if (closeOnBackdrop && e.target === e.currentTarget) onClose()
       }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 999,
+        position: 'fixed', inset: 0, zIndex,
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px))',

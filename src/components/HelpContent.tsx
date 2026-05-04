@@ -72,7 +72,10 @@ export function HelpContent() {
         in order; when the month in the header matches today&apos;s calendar month, it also shows <strong>due today</strong>,{' '}
         <strong>overdue</strong>, or <strong>due in X days</strong>. Tap <strong>Mark paid</strong> when you have actually
         paid a bill this month so it shows up in the six-month history. For subscriptions you can{' '}
-        <strong>Cancel / Keep</strong> instead of deleting the row.
+        <strong>Cancel / Keep</strong> instead of deleting the row. When a bill&apos;s due day is{' '}
+        <strong>tomorrow</strong> on the real calendar, Money HQ may show a one-time <strong>pop-up reminder</strong> that
+        day after the welcome flow (dismiss with <strong>Got it</strong> so it doesn&apos;t repeat until the next
+        &quot;tomorrow&quot; with a match).
       </p>
 
       <p style={{ ...body, marginBottom: '0.5rem' }}>
